@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>関数電卓</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <!-- MathJax: LaTeXレンダリング -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <!-- math.js: 数式計算・記号計算 -->
+  <link rel="stylesheet" href="calc-style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/nerdamer.core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Algebra.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Calculus.js"></script>
+</head>
+<body>
+  <div class="calculator">
+    <!-- ヘッダー -->
+    <h2>関数電卓</h2>
+    
+    <!-- 編集エリア -->
+    <textarea id="editor" placeholder="ここに数式を入力"></textarea>
+    
+    <!-- 数式レンダリング表示エリア -->
+    <div id="display">$$\phantom{0}$$</div>
+    
+    <!-- 計算結果エリア -->
+    <div class="result-container" id="result" data-latex="">
+      <button id="copyAnswer" title="LaTeX形式でコピー"><img src="image/copy.png" alt="コピー" width="12" height="12"><span style="font-size: 12px; vertical-align: top;">コピー</span></button>
+      <span id="resultText">$$\phantom{0}$$</span>
+    </div>
+    
+    <!-- ラジオボタン表示形式切替 -->
+    <div style="margin-bottom: 15px;">
+      <label><input type="radio" name="displayMode" value="decimal" checked> 小数点表示</label>
+      <label><input type="radio" name="displayMode" value="fraction"> 分数表示</label>
+    </div>
+    
+    <!-- コントロールボタン -->
+    <div class="controls">
+      <button id="clear">消去</button>
+      <button id="calculate">計算</button>
+    </div>
+    
+    <!-- ツールバー -->
+    <div class="toolbar-container">
+      <!-- キーパッドタブ（左側） -->
+      <div class="keypad-tabs">
+        <div class="keypad-tab-buttons">
+          <button class="keypad-tab-btn active" data-tab="numKeypad">テンキー</button>
+          <button class="keypad-tab-btn" data-tab="greekKeypad">ギリシャ文字</button>
+        </div>
+        
+        <div class="keypad-tab-contents active" id="numKeypad">
+          <!-- 1行目 -->
+          <button data-value="7">\(7\)</button>
+          <button data-value="8">\(8\)</button>
+          <button data-value="9">\(9\)</button>
+          <button data-value="+">\(+\)</button>
+          <button data-value="^">\(x^y\)</button>
+          <button data-value="π">\(\pi\)</button>
+          
+          <!-- 2行目 -->
+          <button data-value="4">\(4\)</button>
+          <button data-value="5">\(5\)</button>
+          <button data-value="6">\(6\)</button>
+          <button data-value="-">\(-\)</button>
+          <button data-value="\sqrt{}">\(\sqrt{}\)</button>
+          <button data-value="e">\(e\)</button>
+          
+          <!-- 3行目 -->
+          <button data-value="3">\(3\)</button>
+          <button data-value="2">\(2\)</button>
+          <button data-value="1">\(1\)</button>
+          <button data-value="*">\(*\)</button>
+          <button data-value="()">\(()\)</button>
+          <button data-value="[]">\([\,]\)</button>
+          
+          <!-- 4行目 -->
+          <button data-value="0">\(0\)</button>
+          <button data-value=".">\(.\)</button>
+          <button data-value="<">\(<\)</button>
+          <button data-value=">">\(>\)</button>
+          <button data-value="=">\(=\)</button>
+          <button data-value="{}">\(\{\}\)</button>
+          
+          <!-- 5行目 -->
+          <button data-value="/">\(/ \)</button>
+          <button data-value="\frac{}{}">\(\frac{\Box}{\Box}\)</button>
+          <button data-value="・">\(\cdot\)</button>
+          <button data-value="\">\(\backslash\)</button>
+        </div>
+        
+        <div class="keypad-tab-contents" id="greekKeypad">
+          <!-- ギリシャ文字：α～ω -->
+          <button data-value="α">\(\alpha\)</button>
+          <button data-value="β">\(\beta\)</button>
+          <button data-value="γ">\(\gamma\)</button>
+          <button data-value="δ">\(\delta\)</button>
+          <button data-value="ε">\(\epsilon\)</button>
+          <button data-value="ζ">\(\zeta\)</button>
+          <button data-value="η">\(\eta\)</button>
+          <button data-value="θ">\(\theta\)</button>
+          <button data-value="ι">\(\iota\)</button>
+          <button data-value="κ">\(\kappa\)</button>
+          <button data-value="λ">\(\lambda\)</button>
+          <button data-value="μ">\(\mu\)</button>
+          <button data-value="ν">\(\nu\)</button>
+          <button data-value="ξ">\(\xi\)</button>
+          <!-- omicron はそのまま -->
+          <button data-value="ο">\(ο\)</button>
+          <button data-value="π">\(\pi\)</button>
+          <button data-value="ρ">\(\rho\)</button>
+          <button data-value="σ">\(\sigma\)</button>
+          <button data-value="τ">\(\tau\)</button>
+          <button data-value="υ">\(\upsilon\)</button>
+          <button data-value="φ">\(\phi\)</button>
+          <button data-value="χ">\(\chi\)</button>
+          <button data-value="ψ">\(\psi\)</button>
+          <button data-value="ω">\(\omega\)</button>
+        </div>
+      </div>
+      
+      <!-- 右側縦タブ -->
+      <div class="vertical-tabs">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="functionTab">関数</button>
+          <button class="tab-btn" data-tab="calculusTab">微積分</button>
+          <button class="tab-btn" data-tab="vectorTab">ベクトル</button>
+        </div>
+        
+        <div class="tab-contents">
+          <div class="tab-content active" id="functionTab">
+            <button data-value="\sqrt{}" data-input="例: \sqrt{被開平数}">\(\sqrt{}\)</button>
+            <button data-value="\log_x{}" data-input="例: \log_2{8}">\(\log_x{}\)</button>
+            <!-- 三角関数 -->
+            <button data-value="\sin">\(\sin\)</button>
+            <button data-value="\cos">\(\cos\)</button>
+            <button data-value="\tan">\(\tan\)</button>
+          </div>
+          
+          <div class="tab-content" id="calculusTab">
+            <!-- 微積分 -->
+            <button data-value="\lim_{x \to \infty}">\(\lim_{x \to \infty}\)</button>
+            <button data-value="d/dx()" data-input="例: d/dx(式)">\(d/dx()\)</button>
+            <button data-value="∫(, ,)dx" data-input="例: ∫(関数,下限,上限)dx">\(\int(, ,)dx\)</button>
+          </div>
+          
+          <div class="tab-content" id="vectorTab">
+            <!-- ベクトル記号はそのまま挿入、表示は \vec{} をレンダリング -->
+            <button data-value="\vec{}" data-input="行列記号: 行数・列数を入力してください">\(\vec{a}\)</button>
+            <!-- 行列記号は表示部分のみ以下の LaTeX をレンダリング -->
+            <button data-value="\begin{pmatrix} & \\ & \end{pmatrix>" data-input="例: 2×2行列: \begin{pmatrix} a & b \\ c & d \end{pmatrix}">
+              \(\begin{pmatrix}\Box & \Box \\ \Box & \Box \end{pmatrix}\)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ボタン説明エリア -->
+  <div id="buttonDescription">ボタンの説明がここに表示されます</div>
+  
+  <!-- スクリプト読み込み -->
+  <script src="calc-script.js"></script>
+  <script src="lexer.js"></script>
+  <script src="parser.js"></script>
+  <script src="evaluateExpressionToLatex.js"></script>
+</body>
+</html>

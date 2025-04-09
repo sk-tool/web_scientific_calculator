@@ -1,0 +1,245 @@
+/* 全体背景と中央寄せ */
+body {
+  background: #f0f0f0;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 電卓コンテナ（カード型）：最大幅1000px */
+.calculator {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  max-width: 1000px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ヘッダー */
+.calculator h2 {
+  text-align: center;
+  margin: 0 0 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+/* 編集エリア（テキストエリア）：高さ200px */
+#editor {
+  width: 100%;
+  height: 200px;
+  font-size: 18px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+/* 数式レンダリング表示エリア：左寄せ */
+#display {
+  background: #222;
+  color: #0f0;
+  font-size: 28px;
+  text-align: left !important;
+  padding: 10px;
+  border-radius: 5px;
+  min-height: 50px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+/* 計算結果エリア：左寄せ */
+.result-container {
+  position: relative;
+  background: #eee;
+  color: #333;
+  font-size: 22px;
+  text-align: left !important;
+  padding: 10px 50px 10px 10px;
+  border-radius: 5px;
+  min-height: 40px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+/* コピーアイコン */
+#copyAnswer {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+}
+
+/* コントロールボタン */
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.controls button {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #4CAF50;
+  color: #fff;
+  transition: background 0.3s;
+}
+
+.controls button:hover {
+  background: #45a049;
+}
+
+/* ツールバー全体：2カラム構成 */
+.toolbar-container {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* キーパッドタブ（左側）：タブ形式 */
+.keypad-tabs {
+  flex-grow: 1;
+  max-width: 500px;
+  box-sizing: border-box;
+}
+
+.keypad-tab-buttons {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.keypad-tab-buttons button {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.keypad-tab-buttons button.active {
+  background: #bbb;
+}
+
+.keypad-tab-contents {
+  display: none;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.keypad-tab-contents.active {
+  display: flex;
+}
+
+/* キーパッドタブ内ボタン（6列表示） */
+.keypad-tab-contents button {
+  flex: 1 1 calc(100%/6 - 10px);
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.keypad-tab-contents button:hover {
+  background: #ccc;
+}
+
+/* 右側縦タブ：タブラベルと内容を横並びに */
+.vertical-tabs {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+.tab-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tab-buttons button {
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 5px;
+}
+
+.tab-buttons button.active {
+  background: #bbb;
+}
+
+.tab-contents {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1;
+}
+
+.tab-content {
+  display: none;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
+.tab-content button {
+  flex: 1 1 calc(50% - 10px);
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background: #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tab-content button:hover {
+  background: #ddd;
+}
+
+/* ボタン説明エリア */
+#buttonDescription {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 1000px;
+  text-align: left;
+  font-size: 16px;
+  color: #333;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
