@@ -291,5 +291,6 @@ class Lexer {
  */
 function lex(input) {
   const lexer = new Lexer(input);
+  console.log(lexer);
   return lexer.tokenize();
 }

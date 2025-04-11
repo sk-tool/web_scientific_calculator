@@ -10,9 +10,23 @@
   <!-- math.js: 数式計算・記号計算 -->
   <link rel="stylesheet" href="calc-style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/nerdamer.core.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Algebra.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/nerdamer/1.1.13/Calculus.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.12/nerdamer.core.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.12/Algebra.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.12/Calculus.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.12/Solve.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.12/Extra.js"></script>
+  <script>
+    // nerdamerがグローバルスコープで利用可能かどうかを確認
+    window.addEventListener('load', function() {
+      console.log("Window loaded, checking nerdamer availability...");
+      if (typeof nerdamer !== 'undefined') {
+        console.log("Nerdamer is available in global scope");
+        window.nerdamer = nerdamer;
+      } else {
+        console.error("Nerdamer is not available in global scope");
+      }
+    });
+  </script>
 </head>
 <body>
   <div class="calculator">

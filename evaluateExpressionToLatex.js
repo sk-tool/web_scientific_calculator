@@ -158,15 +158,24 @@ function containsSymbols(node) {
   switch (node.type) {
     case 'Identifier':
       // 既知の定数以外の識別子は変数とみなす
-      return node.value !== 'e' && 
-             node.value !== 'pi' && 
-             node.value !== 'π' && 
-             node.value !== 'i';
+      const isVariable = node.value !== 'e' && 
+                         node.value !== 'pi' && 
+                         node.value !== 'π' && 
+                         node.value !== 'i';
+      
+      // 変数を検出した場合はログ出力
+      if (isVariable) {
+        console.log(`Variable detected: ${node.value}`);
+      }
+      
+      return isVariable;
              
     case 'BinaryExpression':
     case 'ComparisonExpression':
     case 'AssignmentExpression':
-      return containsSymbols(node.left) || containsSymbols(node.right);
+      const leftContains = containsSymbols(node.left);
+      const rightContains = containsSymbols(node.right);
+      return leftContains || rightContains;
       
     case 'UnaryExpression':
       return containsSymbols(node.operand);
@@ -189,82 +198,136 @@ function containsSymbols(node) {
 }
 
 /**
- * 特定のパターンの式を直接処理する関数
+ * 代数的計算を行う関数
  * @param {string} exprStr - 式の文字列表現
- * @returns {string|null} - 特定パターンに一致した場合は結果、それ以外はnull
+ * @returns {string} - 計算結果の文字列表現
  */
-function handleSpecialPatterns(exprStr) {
-  console.log("Checking for special patterns in:", exprStr);
+function performAlgebraicCalculation(exprStr) {
+  console.log("Performing algebraic calculation for:", exprStr);
   
-  // 問題の式のパターン: \frac{d+2*(\frac{5*b+2*d}{5})}{3} → \frac{10*b+9*d}{15}
-  
-  // パターン1: (d+2*((5*b+2*d)/5))/3
-  const pattern1 = /\(\s*([a-z])\s*\+\s*2\s*\*\s*\(\s*\(\s*5\s*\*\s*([a-z])\s*\+\s*2\s*\*\s*\1\s*\)\s*\/\s*5\s*\)\s*\)\s*\/\s*3/;
-  const match1 = exprStr.match(pattern1);
-  
-  if (match1) {
-    console.log("Matched special pattern 1!");
-    const d = match1[1];
-    const b = match1[2];
-    return `(10*${b}+9*${d})/15`;
-  }
-  
-  // パターン2: (d+2*(5*b+2*d)/5)/3
-  const pattern2 = /\(\s*([a-z])\s*\+\s*2\s*\*\s*\(\s*5\s*\*\s*([a-z])\s*\+\s*2\s*\*\s*\1\s*\)\s*\/\s*5\s*\)\s*\/\s*3/;
-  const match2 = exprStr.match(pattern2);
-  
-  if (match2) {
-    console.log("Matched special pattern 2!");
-    const d = match2[1];
-    const b = match2[2];
-    return `(10*${b}+9*${d})/15`;
-  }
-  
-  // パターン3: 変数の順序が異なる場合 (d+2*((2*d+5*b)/5))/3
-  const pattern3 = /\(\s*([a-z])\s*\+\s*2\s*\*\s*\(\s*\(\s*2\s*\*\s*\1\s*\+\s*5\s*\*\s*([a-z])\s*\)\s*\/\s*5\s*\)\s*\)\s*\/\s*3/;
-  const match3 = exprStr.match(pattern3);
-  
-  if (match3) {
-    console.log("Matched special pattern 3!");
-    const d = match3[1];
-    const b = match3[2];
-    return `(10*${b}+9*${d})/15`;
-  }
-  
-  // パターン4: 変数の順序が異なる場合 (d+2*(2*d+5*b)/5)/3
-  const pattern4 = /\(\s*([a-z])\s*\+\s*2\s*\*\s*\(\s*2\s*\*\s*\1\s*\+\s*5\s*\*\s*([a-z])\s*\)\s*\/\s*5\s*\)\s*\/\s*3/;
-  const match4 = exprStr.match(pattern4);
-  
-  if (match4) {
-    console.log("Matched special pattern 4!");
-    const d = match4[1];
-    const b = match4[2];
-    return `(10*${b}+9*${d})/15`;
-  }
-  
-  // パターン5: 括弧の有無が異なる場合
-  if (exprStr.includes('frac')) {
-    // LaTeX形式の分数が含まれている場合
-    const fracPattern = /\(\s*([a-z])\s*\+\s*2\s*\*\s*frac\s*\(\s*5\s*\*\s*([a-z])\s*\+\s*2\s*\*\s*\1\s*,\s*5\s*\)\s*\)\s*\/\s*3/;
-    const fracMatch = exprStr.match(fracPattern);
-    
-    if (fracMatch) {
-      console.log("Matched frac pattern!");
-      const d = fracMatch[1];
-      const b = fracMatch[2];
-      return `(10*${b}+9*${d})/15`;
+  // nerdamerが利用可能かチェック
+  if (!isNerdamerAvailable()) {
+    console.log("Nerdamer is not available, using math.js for algebraic calculation");
+    try {
+      const mathResult = math.simplify(exprStr).toString();
+      console.log("Math.js simplification result:", mathResult);
+      return mathResult;
+    } catch (mathError) {
+      console.error("Math.js simplification error:", mathError);
+      return exprStr; // 計算に失敗した場合は元の式を返す
     }
   }
   
-  // 直接ハードコードされたパターン
-  // 問題の式が正確に一致する場合は直接結果を返す
-  if (exprStr.includes('d+2*(5*b+2*d)/5)/3')) {
-    console.log("Direct match for the problematic expression!");
-    return '(10*b+9*d)/15';
+  try {
+    // nerdamerインスタンスを取得
+    const nerdamerInstance = getNerdamer();
+    if (!nerdamerInstance) {
+      throw new Error("Nerdamer is not available");
+    }
+    
+    // 入れ子になった分数式を含む場合の特別処理
+    if (exprStr.includes('/') && (exprStr.indexOf('/') !== exprStr.lastIndexOf('/'))) {
+      console.log("Nested fraction detected, using special handling");
+      
+      try {
+        // nerdamerを使用して代数的に計算
+        const nerdamerExpr = nerdamerInstance(exprStr);
+        
+        // 式を展開
+        const expanded = nerdamerExpr.expand();
+        console.log("Expanded expression:", expanded.text());
+        
+        // 式を単純化
+        const simplified = expanded.simplify();
+        console.log("Simplified expression:", simplified.text());
+        
+        // 分数形式で結果を取得
+        const result = simplified.text('fractions');
+        console.log("Final result:", result);
+        
+        return result;
+      } catch (nestedError) {
+        console.error("Error in nested fraction calculation:", nestedError);
+        
+        // 入れ子になった分数式の計算に失敗した場合、手動で計算を試みる
+        try {
+          // 式を手動で展開して単純化
+          // 例: (a+b)/(c+d) → (a+b)*(1/(c+d)) → a/(c+d) + b/(c+d)
+          const manualResult = nerdamerInstance(exprStr).expand().text('fractions');
+          console.log("Manual expansion result:", manualResult);
+          return manualResult;
+        } catch (manualError) {
+          console.error("Error in manual calculation:", manualError);
+          // 手動計算にも失敗した場合は元の式を返す
+          return exprStr;
+        }
+      }
+    }
+    
+    // 通常の代数的計算
+    const nerdamerExpr = nerdamerInstance(exprStr);
+    
+    // 式を展開
+    const expanded = nerdamerExpr.expand();
+    console.log("Expanded expression:", expanded.text());
+    
+    // 式を単純化
+    const simplified = expanded.simplify();
+    console.log("Simplified expression:", simplified.text());
+    
+    // 分数形式で結果を取得
+    const result = simplified.text('fractions');
+    console.log("Final result:", result);
+    
+    return result;
+  } catch (e) {
+    console.error("Error in algebraic calculation:", e);
+    
+    // nerdamerでの計算に失敗した場合、math.jsを試す
+    try {
+      const mathResult = math.simplify(exprStr).toString();
+      console.log("Math.js simplification result:", mathResult);
+      return mathResult;
+    } catch (mathError) {
+      console.error("Math.js simplification error:", mathError);
+      return exprStr; // すべての計算に失敗した場合は元の式を返す
+    }
   }
+}
+
+/**
+ * nerdamerが利用可能かどうかをチェックする関数
+ * @returns {boolean} - nerdamerが利用可能な場合はtrue
+ */
+function isNerdamerAvailable() {
+  // グローバルスコープとwindowオブジェクトの両方をチェック
+  const globalAvailable = typeof nerdamer !== 'undefined';
+  const windowAvailable = typeof window.nerdamer !== 'undefined';
+  const available = globalAvailable || windowAvailable;
   
+  console.log(`Nerdamer availability check: ${available ? 'Available' : 'Not available'}`);
+  console.log(`- Global scope: ${globalAvailable ? 'Available' : 'Not available'}`);
+  console.log(`- Window object: ${windowAvailable ? 'Available' : 'Not available'}`);
+  
+  return available;
+}
+
+// nerdamerを取得する関数（グローバルスコープまたはwindowオブジェクトから）
+function getNerdamer() {
+  if (typeof nerdamer !== 'undefined') {
+    return nerdamer;
+  } else if (typeof window.nerdamer !== 'undefined') {
+    return window.nerdamer;
+  }
+  console.error("Nerdamer is not available");
   return null;
 }
+
+// 初期化時にnerdamerの可用性をチェック
+console.log("Checking nerdamer availability on script load...");
+setTimeout(() => {
+  console.log(`Nerdamer is ${isNerdamerAvailable() ? 'available' : 'not available'} after timeout`);
+}, 500);
 
 /**
  * 抽象構文木を評価してLaTeX形式に変換する関数
@@ -277,96 +340,54 @@ function evaluateExpressionToLatex(ast) {
     const exprStr = astToString(ast);
     console.log("Expression string:", exprStr);
     
-    // 特定パターンの式を直接処理
-    const specialResult = handleSpecialPatterns(exprStr);
-    if (specialResult) {
-      console.log("Using special pattern result:", specialResult);
-      try {
-        // 特別な結果をLaTeX形式に変換
-        const latex = math.parse(specialResult).toTex({ 
-          parenthesis: 'keep', 
-          implicit: 'show' 
-        });
-        return { engine: 'special-pattern', latex: `\\displaystyle ${latex}` };
-      } catch (e) {
-        console.error("Error converting special result to LaTeX:", e);
-      }
-    }
-    
     // 変数を含むかチェック
     const hasVariables = containsSymbols(ast);
     
-    if (hasVariables) {
-      // 変数を含む式の場合は代数的計算を行う
+    // 数式に文字が含まれる場合はnerdamerを使用（利用可能な場合）
+    if (hasVariables && isNerdamerAvailable()) {
+      console.log("Expression contains variables, using nerdamer");
+      
       try {
-        // 問題の式を直接検出して処理
-        if (exprStr.includes('d+2*(5*b+2*d)/5)/3') || 
-            exprStr.includes('(d+2*((5*b+2*d)/5))/3')) {
-          console.log("Detected the problematic expression in evaluateExpressionToLatex");
-          const result = '(10*b+9*d)/15';
-          const latex = math.parse(result).toTex({ 
-            parenthesis: 'keep', 
-            implicit: 'show' 
-          });
-          return { engine: 'algebraic-calculation', latex: `\\displaystyle ${latex}` };
+        // nerdamerインスタンスを取得
+        const nerdamerInstance = getNerdamer();
+        if (!nerdamerInstance) {
+          throw new Error("Nerdamer is not available");
         }
         
-        // 入れ子になった分数式を含む場合
-        if (exprStr.includes('/') && (exprStr.indexOf('/') !== exprStr.lastIndexOf('/'))) {
-          console.log("Nested fraction detected in evaluateExpressionToLatex");
-          try {
-            // nerdamerを使用して代数的に計算
-            const nerdamerExpr = nerdamer(exprStr);
-            // 式を展開して単純化
-            const expanded = nerdamerExpr.expand();
-            const simplified = expanded.simplify();
-            const result = simplified.text('fractions');
-            console.log("Algebraically calculated result:", result);
-            
-            // 結果をLaTeX形式に変換
-            let latex;
-            try {
-              latex = simplified.toTeX();
-            } catch (latexError) {
-              latex = math.parse(result).toTex({ 
-                parenthesis: 'keep', 
-                implicit: 'show' 
-              });
-            }
-            
-            return { engine: 'algebraic-calculation', latex: `\\displaystyle ${latex}` };
-          } catch (e) {
-            console.error("Error in algebraic calculation:", e);
-          }
-        }
+        // nerdamerを使用して代数的計算を実行
+        const nerdamerExpr = nerdamerInstance(exprStr);
         
-        // 通常の単純化処理
-        // nerdamer.jsを使用して式を単純化
-        const nerdamerExpr = nerdamer(exprStr);
-        // expand()で展開し、simplify()で単純化
+        // 式を展開
         const expanded = nerdamerExpr.expand();
-        const simplified = expanded.simplify();
-        const result = simplified.text('fractions');
-        console.log("Simplified with nerdamer:", result);
+        console.log("Expanded expression:", expanded.text());
         
-        // 単純化された式をLaTeX形式に変換
-        // nerdamerのLaTeX変換を使用
+        // 式を単純化
+        const simplified = expanded.simplify();
+        console.log("Simplified expression:", simplified.text());
+        
+        // 分数形式で結果を取得
+        const result = simplified.text('fractions');
+        console.log("Final nerdamer result:", result);
+        
+        // 結果をLaTeX形式に変換
         let latex;
         try {
-          latex = simplified.toTeX();
+          // nerdamerでLaTeX形式に変換
+          latex = nerdamerInstance(result).toTeX();
         } catch (latexError) {
-          // nerdamerのLaTeX変換に失敗した場合はmath.jsを使用
+          console.error("Error converting to LaTeX with nerdamer:", latexError);
+          // 変換に失敗した場合はmath.jsを使用
           latex = math.parse(result).toTex({ 
             parenthesis: 'keep', 
             implicit: 'show' 
           });
         }
         
-        return { engine: 'nerdamer.js', latex: `\\displaystyle ${latex}` };
-      } catch (simplifyError) {
-        console.error("Nerdamer simplify error:", simplifyError);
+        return { engine: 'nerdamer', latex: `\\displaystyle ${latex}` };
+      } catch (nerdamerError) {
+        console.error("Nerdamer calculation error:", nerdamerError);
         
-        // nerdamerでの単純化に失敗した場合はmath.jsを試す
+        // nerdamerでの計算に失敗した場合はmath.jsを試す
         try {
           const simplified = math.simplify(exprStr).toString();
           console.log("Simplified with math.js:", simplified);
@@ -391,9 +412,12 @@ function evaluateExpressionToLatex(ast) {
         }
       }
     } else {
-      // 変数を含まない式の場合は計算を実行
+      // 数字のみの場合はmath.jsを使用
+      console.log("Expression contains only numbers, using math.js");
+      
+      // math.jsで計算を実行
       const result = math.evaluate(exprStr);
-      console.log("Calculation result:", result);
+      console.log("Math.js calculation result:", result);
       
       // 結果をLaTeX形式に変換
       let latex;
